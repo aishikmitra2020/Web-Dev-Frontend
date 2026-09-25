@@ -1,0 +1,47 @@
+
+React converts JSX into React elements.
+        JSX (JavaScript XML) is not directly used in the browser. It is transpiled into React elements using React.createElement().
+
+React uses the Virtual DOM (VDOM) for efficient updates.
+        React maintains a Virtual DOM, which is a lightweight copy of the actual DOM.
+
+        When the state or props change, React creates a new Virtual DOM tree.
+
+React performs "Diffing" (Reconciliation).
+        React compares (diffs) the new Virtual DOM with the previous Virtual DOM.
+
+        It calculates the minimum required updates instead of re-rendering everything.
+
+React updates the real DOM efficiently.
+        After finding differences, React updates only the necessary parts of the real DOM using batch updates (via React Fiber).
+
+
+Babel
+Babel's role is to convert JSX into JavaScript code. However, React itself is responsible for creating React Elements from that code.
+
+1️⃣ You write JSX in a React component:
+const App = () => {
+  return <h1>Hello, World!</h1>;
+};
+
+2️⃣ Babel compiles JSX into React.createElement():
+Babel converts the JSX code into the following JavaScript:
+const App = () => {
+  return React.createElement("h1", null, "Hello, World!");
+};
+
+3️⃣ React.createElement() creates a React Element:
+{
+  type: "h1",
+  props: { children: "Hello, World!" },
+  key: null,
+}
+
+4️⃣ React renders this element inside the Virtual DOM and updates the real DOM.
+
+
+
+1.      JSX is not valid JavaScript, so it needs to be converted into JavaScript.
+2.      Babel (a compiler) transpiles JSX into React.createElement() calls.
+3.      React.createElement() generates React elements, which are plain JavaScript objects.
+4.      These React elements form the Virtual DOM, which React uses to efficiently update the real DOM.

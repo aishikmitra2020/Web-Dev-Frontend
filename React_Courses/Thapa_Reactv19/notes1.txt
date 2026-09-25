@@ -1,0 +1,2 @@
+React uses JS library. It uses a declarative approach
+

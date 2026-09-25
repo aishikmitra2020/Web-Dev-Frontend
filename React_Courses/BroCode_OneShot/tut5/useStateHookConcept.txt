@@ -1,0 +1,16 @@
+let x = 0;
+const upddateX = () => {
+    x++;
+    console.log(x);
+    
+}
+its printing the right value in console but not showing the right value in the UI
+
+Why is x Updating in Console but Not in UI?
+In your code, x is a normal variable, not a state variable. This means:
+✅ It updates in the console (inside the function call).
+❌ It does not trigger a re-render, so the UI does not update.
+
+🔴 Problem:
+x updates, but React does not track normal variables between renders.
+The UI only updates when React state changes, which is not happening here.

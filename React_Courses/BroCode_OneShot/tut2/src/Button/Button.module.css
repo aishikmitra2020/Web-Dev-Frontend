@@ -1,0 +1,12 @@
+/* CSS Modules are a way to write scoped, component-specific CSS in React. Unlike global CSS, CSS Modules prevent styles from conflicting across different components by automatically generating unique class names by hashing. */
+
+/* For example, '.button' will look like '.button__3dXyA' */
+
+.button{
+    background-color: hsl(200, 100%, 50%);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+}
