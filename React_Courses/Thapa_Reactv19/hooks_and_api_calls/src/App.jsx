@@ -11,7 +11,9 @@ import { Home } from './ContextAPI_and_CustomHooks/Home'
 import Services from './ContextAPI_and_CustomHooks/Services'
 import ReducerTut1 from './hooks/useReducer'
 import ReducerTut2 from './hooks/useReducer/tut2'
-import ReactMemo from './hooks/Memo/ReactMemo'
+import ReactMemo from './hooks/Memo_and_Callback/ReactMemo'
+import UseMemo from './hooks/Memo_and_Callback/UseMemo'
+import ReactMemo3 from './hooks/Memo_and_Callback/passing_objects'
 
 const App = () => {
   return (
@@ -47,6 +49,8 @@ const App = () => {
 
       <h1><u>useMemo</u></h1>
       <ReactMemo />
+      <UseMemo />
+      <ReactMemo3 />
     </>
   )
 }
