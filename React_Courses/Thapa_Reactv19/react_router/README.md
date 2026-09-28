@@ -656,7 +656,7 @@ const router = createBrowserRouter([
   {
     path: '/',
     element: <AppLayout />,
-    // Catches route rendering, loader, and action errors
+    // Catches route rendering, route loader, and route action errors
     errorElement: <ErrorPage />, 
     children: [
       { path: '/', element: <Home /> },
