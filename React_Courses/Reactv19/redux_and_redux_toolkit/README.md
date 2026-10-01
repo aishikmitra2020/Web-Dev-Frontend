@@ -358,3 +358,287 @@ import { composeWithDevTools } from '@redux-devtools/extension';
 
 export const store = createStore(taskReducer, composeWithDevTools());
 ```
+
+---
+
+# Redux Middleware: Redux Thunk
+
+## Overview
+**Redux Thunk** is a middleware that enables action creators to return a **function** (often asynchronous) instead of a plain action object. 
+
+By default, Redux only supports synchronous data flow via standard action objects (`{ type, payload }`). Redux Thunk intercepts functions passed to `dispatch`, provides them with the store's `dispatch` and `getState` methods, and allows you to execute asynchronous operations—such as fetching data from an API—before dispatching standard actions to update the state.
+
+---
+
+## 1. Installation
+
+Install `redux-thunk` along with the Redux DevTools extension for debugging:
+
+```bash
+npm install redux-thunk @redux-devtools/extension redux
+```
+
+---
+
+## 2. Store Configuration
+
+To enable Thunk, apply it using Redux's `applyMiddleware` function. You can wrap it with `composeWithDevTools` to connect Redux DevTools.
+
+```javascript
+import { createStore, applyMiddleware } from "redux";
+import { composeWithDevTools } from "@redux-devtools/extension";
+import { thunk } from "redux-thunk";
+import { taskReducer } from "./taskReducer";
+
+// Create store with Thunk middleware and Redux DevTools enabled
+export const store = createStore(
+  taskReducer,
+  composeWithDevTools(applyMiddleware(thunk))
+);
+```
+
+---
+
+## 3. Reducer & State Setup
+
+```javascript
+// Action Types
+const ADD_TASK = "task/add";
+const DELETE_TASK = "task/delete";
+const FETCH_TASKS = "task/fetch";
+
+// Initial State
+const initialState = {
+  task: [],
+  isLoading: false,
+};
+
+// Task Reducer
+export const taskReducer = (state = initialState, action) => {
+  switch (action.type) {
+    case ADD_TASK:
+      return {
+        ...state,
+        task: [...state.task, action.payload]
+      };
+
+    case DELETE_TASK:
+      return {
+        ...state,
+        task: state.task.filter((_, index) => index !== action.payload)
+      };
+
+    case FETCH_TASKS:
+      return {
+        ...state,
+        task: [...state.task, ...action.payload]
+      };
+
+    default:
+      return state;
+  }
+};
+```
+
+---
+
+## 4. Action Creators
+
+### Standard Action Creators (Synchronous)
+These return plain JS objects directly to the reducer.
+
+```javascript
+export const addTask = (data) => ({
+  type: ADD_TASK,
+  payload: data
+});
+
+export const deleteTask = (taskIndex) => ({
+  type: DELETE_TASK,
+  payload: taskIndex
+});
+```
+
+### Thunk Action Creator (Asynchronous)
+This returns an `async` function. Redux Thunk intercepts this function and passes `dispatch` as its argument.
+
+```javascript
+export const fetchTask = () => {
+  return async (dispatch) => {
+    try {
+      const res = await fetch("https://jsonplaceholder.typicode.com/todos?_limit=3");
+      const data = await res.json();
+
+      // Extract task titles and dispatch to reducer
+      const taskTitles = data.map((currTask) => currTask.title);
+      dispatch({ type: FETCH_TASKS, payload: taskTitles });
+    } catch (err) {
+      console.error("Failed to fetch tasks:", err);
+    }
+  };
+};
+```
+
+---
+
+## 5. Usage Example
+
+```javascript
+import { store } from "./store";
+import { addTask, deleteTask, fetchTask } from "./actions";
+
+// 1. Dispatching synchronous actions
+store.dispatch(addTask("Learn Redux Thunk"));
+store.dispatch(addTask("Build a project"));
+
+// 2. Dispatching asynchronous thunk action
+store.dispatch(fetchTask());
+
+// 3. Dispatching a delete action
+store.dispatch(deleteTask(0)); // Removes task at index 0
+```
+
+## 5. Usage Example (Component)
+
+```jsx
+import React, { useState } from 'react';
+import { MdDeleteForever } from "react-icons/md";
+import { useDispatch, useSelector } from 'react-redux';
+import { addTask, deleteTask, fetchTask } from '../store';
+
+export default function Todo() {
+
+    const [task, setTask] = useState("");
+
+    const tasks = useSelector((state) => state.task);
+    console.log('tasks:', tasks);
+
+    // Get the dispatch function
+    const dispatch = useDispatch();
+
+    // handleFormSubmit
+    const handleFormSubmit = (e) => {
+        e.preventDefault();
+
+        dispatch(addTask(task));
+        return setTask("");
+    }
+
+    // handleTaskDelete
+    const handleTaskDelete = (index) => {
+        return dispatch(deleteTask(index))
+    }
+
+    // handleFetchTasks
+    const handleFetchTasks = () => {
+        dispatch(fetchTask());
+    }
+
+    return (
+        <div className="min-h-screen bg-slate-100 flex items-center justify-center p-4">
+            <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
+                <h1 className="text-2xl font-bold text-slate-800 text-center mb-6">
+                    To-Do List
+                </h1>
+
+                <form onSubmit={handleFormSubmit} className="flex gap-2 mb-6">
+                    <input
+                        type="text"
+                        placeholder="Add a new task..."
+                        value={task}
+                        onChange={(e) => setTask(e.target.value)}
+                        className="flex-1 px-4 py-2 text-slate-700 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
+                    />
+                    <button
+                        type="submit"
+                        className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg shadow-sm transition-colors duration-200 flex items-center justify-center whitespace-nowrap"
+                    >
+                        Add Task
+                    </button>
+                </form>
+
+                <button
+                        onClick={handleFetchTasks}
+                        className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg shadow-sm transition-colors duration-200 flex items-center justify-center whitespace-nowrap"
+                    >
+                        Fetch Task
+                    </button>
+
+                <div className="space-y-3 max-h-80 overflow-y-auto pr-1">
+                    {tasks.length === 0 ? (
+                        <p className="text-center text-slate-400 py-4">No tasks yet!</p>
+                    ) : (
+                        tasks.map((task, indx) => (
+                            <div key={indx} className="rounded-lg border border-slate-200 bg-slate-50 p-3 flex items-stretch">
+                                <p
+                                    className={`flex-1 text-slate-700 select-none transition-all ${task.completed ? 'line-through text-slate-400' : ''
+                                        }`}
+                                >
+                                    {task}
+                                </p>
+                                <button className="ml-2 text-red-500 hover:text-red-700 text-xl">
+                                    <MdDeleteForever onClick={() => handleTaskDelete(indx)} />
+                                </button>
+                            </div>
+                        ))
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+}
+```
+
+---
+
+## Logic Flow & Code Explanation
+
+### Architectural Flow
+
+```
++-----------------------------------------------------------------------+
+|                               DISPATCH                                |
++-----------------------------------------------------------------------+
+                                   |
+                                   v
+                      +-------------------------+
+                      |   Redux Thunk Check     |
+                      +-------------------------+
+                                 /   \
+                  Is Function?  /     \  Is Plain Object?
+                               /       \
+                              v         v
+             +--------------------+   +--------------------+
+             | Execute Function   |   | Send directly to   |
+             | (Perform API Call) |   | Reducer            |
+             +--------------------+   +--------------------+
+                       |                        |
+                       v                        v
+             +--------------------+   +--------------------+
+             | Dispatch standard  |   | State updated in   |
+             | action with result |   | Reducer            |
+             +--------------------+   +--------------------+
+```
+
+### Step-by-Step Logic Breakdown
+
+1. **Dispatch Invocation:**
+   When `store.dispatch(fetchTask())` is called, `fetchTask()` evaluates to an inner `async (dispatch) => { ... }` function rather than an action object `{ type, payload }`.
+
+2. **Middleware Interception:**
+   `redux-thunk` inspects every dispatched value:
+   * **Plain Object:** Passes it directly along to `taskReducer`.
+   * **Function:** Stops it from reaching the reducer immediately and executes it, passing `store.dispatch` (and `store.getState`) into it as arguments.
+
+3. **Asynchronous Execution:**
+   Inside the thunk function, network requests run asynchronously using `fetch(...)`. Execution pauses at `await` without blocking the main UI thread.
+
+4. **Completion & Real Dispatch:**
+   Once the API responds with JSON data:
+   * The titles are extracted into an array.
+   * `dispatch({ type: FETCH_TASKS, payload: taskTitles })` is called with a **plain action object**.
+
+5. **State Update:**
+   This second dispatch carries a standard object, so Redux Thunk allows it through to `taskReducer`. The reducer runs the `FETCH_TASKS` case and appends the remote tasks to `state.task`.
+
+

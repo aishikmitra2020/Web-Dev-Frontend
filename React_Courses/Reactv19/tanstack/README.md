@@ -2091,37 +2091,96 @@ export default InfiniteScroll2;
 
 > **Note:** **ALL parameters for `useInView` are optional.** You can call `useInView()` with no arguments passed at all, and it will run using default values.
 
+## `useInView` & React Query Infinite Scroll Guide
+
+This reference guide documents the configuration options and return values for `react-intersection-observer` (`useInView`), alongside key React Query concepts used for infinite scrolling.
+
+---
+
 ### `useInView` Options / Parameters
 
 You can pass an optional configuration object to `useInView(options)`:
 
-| 
+| Parameter | Mandatory / Optional | Type | Default | Explanation |
+| :--- | :--- | :--- | :--- | :--- |
+| **`threshold`** | Optional | `number \| number[]` | `0` | Indicates at what percentage of the target's visibility `inView` should trigger. Range `0.0` (even 1 pixel visible) to `1.0` (100% visible). Can also accept an array of numbers. |
+| **`root`** | Optional | `Element \| null` | `null` | The container element used as the viewport for checking visibility. Defaults to the browser window/viewport if `null`. |
+| **`rootMargin`** | Optional | `string` | `'0px 0px 0px 0px'` | Margin around the root. Works like CSS margins (e.g., `'200px 0px'`). Can pre-trigger loading *before* the element actually hits the screen. |
+| **`triggerOnce`** | Optional | `boolean` | `false` | If `true`, the intersection observer triggers only once and then unbinds itself. Useful for lazy-loading images or one-time animations. |
+| **`skip`** | Optional | `boolean` | `false` | If `true`, stops observing target elements. Useful for dynamically disabling observer logic. |
+| **`initialInView`** | Optional | `boolean` | `false` | Sets the initial state of `inView` before the first measurement occurs. Useful for Server-Side Rendering (SSR). |
+| **`fallbackInView`** | Optional | `boolean` | `false` | Fallback `inView` value if the environment does not support native `IntersectionObserver`. |
+| **`delay`** | Optional | `number` | `0` | Delays updating the `inView` state by specified milliseconds. |
+| **`trackVisibility`** | Optional | `boolean` | `false` | Tracks whether the element is actually visible to the user (not occluded or styled `visibility: hidden`). |
+| **`onChange`** | Optional | `(inView, entry) => void` | `undefined` | Callback function triggered every time the element's visibility state changes across thresholds. |
 
-| **Parameter** | **Mandatory / Optional** | **Type** | **Default** | **Explanation** | 
-| **`threshold`** | **Optional** | `number | number[]` | `0` | Indicates at what percentage of the target's visibility `inView` should trigger. Range `0.0` (even 1 pixel visible) to `1.0` (100% visible). Can also accept an array of numbers. | 
-| **`root`** | **Optional** | `Element | null` | `null` | The container element used as the viewport for checking visibility. Defaults to the browser window/viewport if `null`. | 
-| **`rootMargin`** | **Optional** | `string` | `'0px 0px 0px 0px'` | Margin around the root. Works like CSS margins (e.g., `'200px 0px'`). Can pre-trigger loading *before* the element actually hits the screen. | 
-| **`triggerOnce`** | **Optional** | `boolean` | `false` | If `true`, the intersection observer triggers only once and then unbinds itself. Useful for lazy-loading images or one-time animations. | 
-| **`skip`** | **Optional** | `boolean` | `false` | If `true`, stops observing target elements. Useful for dynamically disabling observer logic. | 
-| **`initialInView`** | **Optional** | `boolean` | `false` | Sets the initial state of `inView` before the first measurement occurs. Useful for SSR (Server-Side Rendering). | 
-| **`fallbackInView`** | **Optional** | `boolean` | `false` | Fallback `inView` value if the environment does not support native `IntersectionObserver`. | 
-| **`delay`** | **Optional** | `number` | `0` | Delays updating the `inView` state by specified milliseconds (requires supporting browsers/polyfills). | 
-| **`trackVisibility`** | **Optional** | `boolean` | `false` | Tracks whether the element is actually visible to the user (not occluded or styled `visibility: hidden`). | 
-| **`onChange`** | **Optional** | `(inView, entry) => void` | `undefined` | Callback function triggered every time the element's visibility state changes across thresholds. | 
+---
 
-### `useInView` Return Values
+## `useInView` Return Values
 
-`useInView` returns an object (or array) containing the following values:
+`useInView` returns an array or object containing the following properties:
 
-| **Return Value** | **Mandatory Usage** | **Type** | **Explanation** | 
-| **`ref`** | **Mandatory** | `(node: Element | null) => void` | Callback ref function that **must** be attached to the target HTML node (e.g., `<div ref={ref} />`) to be observed. | 
-| **`inView`** | **Optional** | `boolean` | A boolean value indicating whether the target element currently meets the threshold condition within the viewport (`true`) or not (`false`). | 
-| **`entry`** | **Optional** | `IntersectionObserverEntry` | The raw native [`IntersectionObserverEntry`](https://developer.mozilla.org/en-US/docs/Web/API/IntersectionObserverEntry) object, which provides details like `intersectionRatio`, `boundingClientRect`, `time`, etc. | 
+| Return Value | Usage | Type | Explanation |
+| :--- | :--- | :--- | :--- |
+| **`ref`** | **Mandatory** | `(node: Element \| null) => void` | Callback ref function that **must** be attached to the target DOM element (e.g., `<div ref={ref} />`) to observe it. |
+| **`inView`** | **Optional** | `boolean` | A boolean indicating whether the target element currently meets the threshold condition within the viewport (`true`) or not (`false`). |
+| **`entry`** | **Optional** | `IntersectionObserverEntry` | The raw native [`IntersectionObserverEntry`](https://developer.mozilla.org/en-US/docs/Web/API/IntersectionObserverEntry) object providing details like `intersectionRatio`, `boundingClientRect`, `time`, etc. |
 
-## Key React Query Concepts
+---
 
-* **`getNextPageParam`**: Receives `(lastPage, allPages)`. Evaluates whether additional pages exist. Returning `undefined` marks `hasNextPage` as `false`.
+## Key React Query Infinite Scroll Concepts
 
-* **`fetchNextPage`**: Function called to initiate fetching the next chunk/page of data.
+When implementing infinite scrolling with `@tanstack/react-query` (via `useInfiniteQuery`), the following parameters and state flags are key:
 
-* **`isFetchingNextPage`**: Boolean flag that indicates if a background request is currently fetching the subsequent page (ideal for showing bottom loading spinners).
+- **`getNextPageParam`**: A callback function receiving `(lastPage, allPages, lastPageParam, allPageParams)`. It evaluates whether additional pages exist. Returning `undefined` or `null` signals that no more pages are available and automatically sets `hasNextPage` to `false`.
+- **`fetchNextPage`**: A trigger function called to manually initiate fetching the next chunk/page of data.
+- **`isFetchingNextPage`**: A boolean flag indicating if a request is currently in flight fetching the subsequent page (ideal for showing loading spinners at the bottom of a list).
+- **`hasNextPage`**: A boolean flag derived from `getNextPageParam` indicating whether there are more pages left to load.
+
+---
+
+### Quick Example: Infinite Scroll with `useInView` & React Query
+
+```tsx
+import React, { useEffect } from "react";
+import { useInView } from "react-intersection-observer";
+import { useInfiniteQuery } from "@tanstack/react-query";
+
+export function InfiniteList() {
+  const { ref, inView } = useInView({
+    threshold: 0.5,
+  });
+
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
+    queryKey: ["items"],
+    queryFn: ({ pageParam = 1 }) => fetchItems(pageParam),
+    getNextPageParam: (lastPage, allPages) => {
+      return lastPage.hasMore ? allPages.length + 1 : undefined;
+    },
+  });
+
+  useEffect(() => {
+    if (inView && hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  return (
+    <div>
+      {data?.pages.flatMap((page) => page.items).map((item) => (
+        <div key={item.id}>{item.name}</div>
+      ))}
+
+      {/* Sentinel element observed by useInView */}
+      <div ref={ref} style={{ height: "20px" }}>
+        {isFetchingNextPage && <p>Loading more...</p>}
+      </div>
+    </div>
+  );
+}
+```

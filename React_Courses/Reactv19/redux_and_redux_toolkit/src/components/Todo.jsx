@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { MdDeleteForever } from "react-icons/md";
 import { useDispatch, useSelector } from 'react-redux';
-import { addTask, deleteTask } from '../store';
+import { addTask, deleteTask, fetchTask } from '../store';
 
 export default function Todo() {
 
@@ -29,6 +29,11 @@ export default function Todo() {
         return dispatch(deleteTask(index))
     }
 
+    // handleFetchTasks
+    const handleFetchTasks = () => {
+        dispatch(fetchTask());
+    }
+
     return (
         <div className="min-h-screen bg-slate-100 flex items-center justify-center p-4">
             <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
@@ -51,6 +56,13 @@ export default function Todo() {
                         Add Task
                     </button>
                 </form>
+
+                <button
+                        onClick={handleFetchTasks}
+                        className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg shadow-sm transition-colors duration-200 flex items-center justify-center whitespace-nowrap"
+                    >
+                        Fetch Task
+                    </button>
 
                 <div className="space-y-3 max-h-80 overflow-y-auto pr-1">
                     {tasks.length === 0 ? (
