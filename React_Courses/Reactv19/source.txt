@@ -1,0 +1,1 @@
+This course is made by me, but for ease i have taken reference from 'React v19 course by Thapa Technical' -> https://www.youtube.com/playlist?list=PLwGdqUZWnOp1Rab71vx2zMF6qpwGDB2Z1

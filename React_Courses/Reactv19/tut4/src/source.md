@@ -80,11 +80,13 @@ border-radius: 5px;
 
 import styles from "./styles.module.css";
 
+```js
 function MyButton() {
   return <button className={styles.button}>Click Me</button>;
 }
 
 export default MyButton;
+```
 
 # Why Styles Are Not Applied Globally?
 When you import a CSS Module, React (or your bundler, like Vite or Webpack) transforms the class names into unique, locally scoped identifiers.
