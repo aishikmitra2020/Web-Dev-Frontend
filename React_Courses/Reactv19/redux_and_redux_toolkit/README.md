@@ -112,7 +112,7 @@ Below is a complete implementation demonstrating action types, initial state, im
 ```javascript
 import { createStore } from "redux";
 
-// 1. Action Types
+// 1. Action Types -> "domain/event"
 const ADD_TASK = "task/add";
 const DELETE_TASK = "task/delete";
 
@@ -191,7 +191,7 @@ const taskReducer = (state = initialState, action) => {
             }
         case DELETE_TASK:
             const updatedTask = state.task.filter((currTask, index) => {
-                return index != action.payload
+                return index !== action.payload
             })
 
             return {
@@ -402,7 +402,7 @@ export const store = createStore(
 ## 3. Reducer & State Setup
 
 ```javascript
-// Action Types
+// Action Types -> "domain/event"
 const ADD_TASK = "task/add";
 const DELETE_TASK = "task/delete";
 const FETCH_TASKS = "task/fetch";
@@ -642,3 +642,7 @@ export default function Todo() {
    This second dispatch carries a standard object, so Redux Thunk allows it through to `taskReducer`. The reducer runs the `FETCH_TASKS` case and appends the remote tasks to `state.task`.
 
 
+---
+
+# Redux Toolkit (RTK)
+> check `Redux-toolkit.md`

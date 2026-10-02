@@ -21,7 +21,7 @@ const taskReducer = (state = initialState, action) => {
             }
         case DELETE_TASK:
             const updatedTask = state.task.filter((currTask, index) => {
-                return index != action.payload
+                return index !== action.payload
             })
 
             return {
